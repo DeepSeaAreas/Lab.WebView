@@ -43,7 +43,7 @@ namespace WebViewExtension
             typeof(string),
             typeof(LocalWebView2),
             new PropertyMetadata(
-                "https://www.baidu.com",
+                "TestWebPage",
                 new PropertyChangedCallback(OnFolderChanged)
             )
         );
@@ -55,14 +55,27 @@ namespace WebViewExtension
         /// <param name="e"></param>
         private static void OnFolderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Debug.WriteLine("test");
             if (d is not LocalWebView2 control) return;
-            control.webView.Source = new Uri(control.Folder);
+            //if (control.webView.CoreWebView2 == null) return;
+            //control.webView.CoreWebView2.SetVirtualHostNameToFolderMapping("local.webview", control.Folder,
+            //    Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+            //control.webView.Reload();
+            control.InitializeAsync();
         }
 
         public LocalWebView2()
         {
             InitializeComponent();
+            InitializeAsync();
+        }
+
+        async void InitializeAsync()
+        {
+            Debug.WriteLine($"Start Localhost initialize at {Folder}...");
+            await webView.EnsureCoreWebView2Async(null);
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping("local.webview", Folder, 
+                Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+            webView.Source = new Uri("https://local.webview/index.html");
         }
     }
 }
